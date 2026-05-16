@@ -15,6 +15,18 @@ body {
   height: 100%;
 }
 
+/* Craft Gradient canvas fix — fills its wrapper without overflow */
+[data-craft-gradient] {
+  overflow: hidden;
+}
+[data-craft-gradient] canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
 body {
   background: #f6f7fb;
   color: #0f172a;

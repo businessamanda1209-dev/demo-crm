@@ -83,6 +83,7 @@ export default function LoginForm() {
       justifyContent: "center",
       fontFamily: "'Inter', system-ui, sans-serif",
       padding: "24px",
+      background: "#000",
     }}>
       {/* Craft gradient background — client-only to avoid hydration mismatch */}
       <GradientBackground />
@@ -91,28 +92,28 @@ export default function LoginForm() {
       <div style={{
         position: "relative", zIndex: 1,
         width: "100%",
-        maxWidth: "960px",
-        minHeight: "580px",
+        maxWidth: "1040px",
+        height: "clamp(560px, 82vh, 720px)",
         display: "flex",
-        borderRadius: "20px",
+        borderRadius: "22px",
         overflow: "hidden",
-        border: "1px solid rgba(255,255,255,0.12)",
-        boxShadow: "0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05) inset",
-        backdropFilter: "blur(2px)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        boxShadow: "0 40px 100px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.04) inset",
+        backdropFilter: "blur(1px)",
       }}>
 
         {/* LEFT — form pane */}
         <div style={{
-          width: "440px",
-          minWidth: "440px",
-          padding: "52px 48px",
-          background: "rgba(6,4,2,0.72)",
-          backdropFilter: "blur(24px)",
-          borderRight: "1px solid rgba(255,255,255,0.07)",
+          width: "420px",
+          minWidth: "420px",
+          padding: "48px 44px",
+          background: "rgba(4,4,4,0.80)",
+          backdropFilter: "blur(28px)",
+          WebkitBackdropFilter: "blur(28px)",
+          borderRight: "1px solid rgba(255,255,255,0.06)",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          gap: "0",
         }}>
 
           {/* Logo */}
@@ -331,18 +332,19 @@ export default function LoginForm() {
           </form>
         </div>
 
-        {/* RIGHT — transparent glass landscape pane */}
+        {/* RIGHT — transparent glass pane showing gradient */}
         <div style={{
           flex: 1,
-          backdropFilter: "blur(3px)",
-          background: "rgba(0,0,0,0.08)",
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+          background: "rgba(0,0,0,0.12)",
           position: "relative",
           overflow: "hidden",
         }}>
-          {/* Subtle inner glow */}
+          {/* Subtle vignette overlay */}
           <div style={{
             position: "absolute", inset: 0,
-            background: "radial-gradient(ellipse at 60% 40%, rgba(255,180,30,0.08) 0%, transparent 70%)",
+            background: "linear-gradient(135deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.0) 60%)",
             pointerEvents: "none",
           }} />
         </div>
