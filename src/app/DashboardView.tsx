@@ -81,10 +81,10 @@ export default function DashboardView({
     <div>
       {/* Page header */}
       <div className="mb-7">
-        <h1 className="text-2xl font-semibold text-slate-700 dark:text-slate-100 tracking-tight">
+        <h1 className="text-2xl font-semibold text-slate-700 dark:text-neutral-100 tracking-tight">
           {d.title(userName)}
         </h1>
-        <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">
+        <p className="mt-1 text-sm text-slate-400 dark:text-neutral-500">
           {d.subtitle}
         </p>
       </div>
@@ -120,9 +120,9 @@ export default function DashboardView({
       {/* Recent panels */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-6">
         {/* Recent Contacts */}
-        <div className="rounded-2xl border border-brand-100/80 dark:border-slate-700 bg-gradient-to-br from-brand-50/50 via-white to-white dark:from-slate-800/60 dark:via-slate-800 dark:to-slate-800 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-brand-100/60 dark:border-slate-700/60">
-            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+        <div className="rounded-2xl border border-brand-100/80 dark:border-neutral-800 bg-gradient-to-br from-brand-50/50 via-white to-white dark:from-neutral-900 dark:via-neutral-900 dark:to-neutral-900 shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-brand-100/60 dark:border-neutral-800/60">
+            <h2 className="text-sm font-semibold text-slate-700 dark:text-neutral-200">
               {d.recentContacts}
             </h2>
             <Link
@@ -142,18 +142,18 @@ export default function DashboardView({
                   <path d="M19 15v6M16 18h6" />
                 </svg>
               </div>
-              <p className="text-sm font-medium text-slate-600 dark:text-slate-300">{d.noContacts}</p>
-              <p className="mt-1 text-xs text-slate-400 dark:text-slate-500 max-w-[220px]">{d.noContactsDesc}</p>
+              <p className="text-sm font-medium text-slate-600 dark:text-neutral-300">{d.noContacts}</p>
+              <p className="mt-1 text-xs text-slate-400 dark:text-neutral-500 max-w-[220px]">{d.noContactsDesc}</p>
             </div>
           ) : (
-            <ul className="divide-y divide-brand-50/80 dark:divide-slate-700/50">
+            <ul className="divide-y divide-brand-50/80 dark:divide-neutral-800/50">
               {recentContacts.map((c) => (
                 <li key={c.id} className="px-5 py-3 flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-sm font-medium text-slate-800 dark:text-slate-100 truncate">
+                    <div className="text-sm font-medium text-slate-800 dark:text-neutral-100 truncate">
                       {c.firstName} {c.lastName}
                     </div>
-                    <div className="text-xs text-slate-400 dark:text-slate-500 truncate">
+                    <div className="text-xs text-slate-400 dark:text-neutral-500 truncate">
                       {c.title ?? "—"}
                       {c.company ? ` · ${c.company.name}` : ""}
                     </div>
@@ -168,9 +168,9 @@ export default function DashboardView({
         </div>
 
         {/* Recent Deals */}
-        <div className="rounded-2xl border border-brand-100/80 dark:border-slate-700 bg-gradient-to-br from-brand-50/50 via-white to-white dark:from-slate-800/60 dark:via-slate-800 dark:to-slate-800 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-brand-100/60 dark:border-slate-700/60">
-            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+        <div className="rounded-2xl border border-brand-100/80 dark:border-neutral-800 bg-gradient-to-br from-brand-50/50 via-white to-white dark:from-neutral-900 dark:via-neutral-900 dark:to-neutral-900 shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-brand-100/60 dark:border-neutral-800/60">
+            <h2 className="text-sm font-semibold text-slate-700 dark:text-neutral-200">
               {d.recentDeals}
             </h2>
             <Link
@@ -190,18 +190,18 @@ export default function DashboardView({
                   <path d="M12 13v4M10 15h4" />
                 </svg>
               </div>
-              <p className="text-sm font-medium text-slate-600 dark:text-slate-300">{d.noDeals}</p>
-              <p className="mt-1 text-xs text-slate-400 dark:text-slate-500 max-w-[220px]">{d.noDealsDesc}</p>
+              <p className="text-sm font-medium text-slate-600 dark:text-neutral-300">{d.noDeals}</p>
+              <p className="mt-1 text-xs text-slate-400 dark:text-neutral-500 max-w-[220px]">{d.noDealsDesc}</p>
             </div>
           ) : (
-            <ul className="divide-y divide-brand-50/80 dark:divide-slate-700/50">
+            <ul className="divide-y divide-brand-50/80 dark:divide-neutral-800/50">
               {recentDeals.map((deal) => (
                 <li key={deal.id} className="px-5 py-3 flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-sm font-medium text-slate-800 dark:text-slate-100 truncate">
+                    <div className="text-sm font-medium text-slate-800 dark:text-neutral-100 truncate">
                       {deal.title}
                     </div>
-                    <div className="text-xs text-slate-400 dark:text-slate-500 truncate">
+                    <div className="text-xs text-slate-400 dark:text-neutral-500 truncate">
                       {deal.company?.name ?? "—"} ·{" "}
                       {deal.expectedCloseDate
                         ? `${d.closes} ${formatDate(deal.expectedCloseDate)}`
@@ -211,7 +211,7 @@ export default function DashboardView({
                     </div>
                   </div>
                   <div className="flex items-center gap-3 whitespace-nowrap">
-                    <span className="text-sm font-semibold text-slate-800 dark:text-slate-100 tabular-nums">
+                    <span className="text-sm font-semibold text-slate-800 dark:text-neutral-100 tabular-nums">
                       {formatCurrency(Number(deal.value))}
                     </span>
                     <span className={`pill ${stageColor(deal.stage)}`}>

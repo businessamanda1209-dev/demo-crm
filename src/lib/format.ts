@@ -27,7 +27,7 @@ export function formatDate(value: Date | string | null | undefined): string {
 export function statusColor(status: string): string {
   switch (status) {
     case "LEAD":
-      return "bg-slate-100 text-slate-700 ring-slate-200 dark:bg-slate-700/40 dark:text-slate-200 dark:ring-slate-600";
+      return "bg-slate-100 text-slate-700 ring-slate-200 dark:bg-neutral-800/50 dark:text-neutral-200 dark:ring-neutral-700";
     case "QUALIFIED":
       return "bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/30";
     case "CUSTOMER":
@@ -35,14 +35,14 @@ export function statusColor(status: string): string {
     case "CHURNED":
       return "bg-rose-50 text-rose-700 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-500/30";
     default:
-      return "bg-slate-100 text-slate-700 ring-slate-200 dark:bg-slate-700/40 dark:text-slate-200 dark:ring-slate-600";
+      return "bg-slate-100 text-slate-700 ring-slate-200 dark:bg-neutral-800/50 dark:text-neutral-200 dark:ring-neutral-700";
   }
 }
 
 export function stageColor(stage: string): string {
   switch (stage) {
     case "PROSPECTING":
-      return "bg-slate-100 text-slate-700 ring-slate-200 dark:bg-slate-700/40 dark:text-slate-200 dark:ring-slate-600";
+      return "bg-slate-100 text-slate-700 ring-slate-200 dark:bg-neutral-800/50 dark:text-neutral-200 dark:ring-neutral-700";
     case "QUALIFICATION":
       return "bg-sky-50 text-sky-700 ring-sky-200 dark:bg-sky-500/10 dark:text-sky-300 dark:ring-sky-500/30";
     case "PROPOSAL":
@@ -54,6 +54,6 @@ export function stageColor(stage: string): string {
     case "CLOSED_LOST":
       return "bg-rose-50 text-rose-700 ring-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-500/30";
     default:
-      return "bg-slate-100 text-slate-700 ring-slate-200 dark:bg-slate-700/40 dark:text-slate-200 dark:ring-slate-600";
+      return "bg-slate-100 text-slate-700 ring-slate-200 dark:bg-neutral-800/50 dark:text-neutral-200 dark:ring-neutral-700";
   }
 }

@@ -41,7 +41,7 @@ export default function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={`Switch to ${theme === "dark" ? tx.theme.light : tx.theme.dark}`}
-      className="inline-flex items-center gap-2 w-full rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition"
+      className="inline-flex items-center gap-2 w-full rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100 transition"
     >
       {mounted && theme === "dark" ? (
         <>

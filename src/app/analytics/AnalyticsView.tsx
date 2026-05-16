@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import PageHeader from "@/components/PageHeader";
 import StatCard from "@/components/StatCard";
@@ -81,14 +81,14 @@ export default function AnalyticsView({
       />
 
       <div className="card mt-6 overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+        <div className="px-5 py-4 border-b border-slate-100 dark:border-neutral-800">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
             {a.topAccounts}
           </h2>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full">
-            <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700">
+            <thead className="bg-slate-50 dark:bg-neutral-900/60 border-b border-slate-200 dark:border-neutral-800">
               <tr>
                 <th className="table-th">{a.colCompany}</th>
                 <th className="table-th">{a.colIndustry}</th>
@@ -97,10 +97,10 @@ export default function AnalyticsView({
                 <th className="table-th">{a.colRevenue}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
               {topCompanies.map((c) => (
                 <tr key={c.name}>
-                  <td className="table-td font-medium text-slate-900 dark:text-slate-100">
+                  <td className="table-td font-medium text-slate-900 dark:text-neutral-100">
                     {c.name}
                   </td>
                   <td className="table-td">{c.industry}</td>

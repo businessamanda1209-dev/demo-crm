@@ -12,9 +12,9 @@ export default function StatCard({
   icon?: ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-brand-100 dark:border-slate-700 bg-gradient-to-br from-brand-50 via-white to-white dark:from-slate-800/80 dark:via-slate-800 dark:to-slate-800 shadow-sm p-5 flex flex-col">
+    <div className="rounded-2xl border border-brand-100 dark:border-neutral-800 bg-gradient-to-br from-brand-50 via-white to-white dark:from-neutral-900 dark:via-neutral-900 dark:to-neutral-900 shadow-sm p-5 flex flex-col">
       <div className="flex items-start justify-between gap-2">
-        <div className="text-[11px] uppercase tracking-widest font-semibold text-slate-400 dark:text-slate-500">
+        <div className="text-[11px] uppercase tracking-widest font-semibold text-slate-400 dark:text-neutral-500">
           {label}
         </div>
         {icon && (
@@ -23,11 +23,11 @@ export default function StatCard({
           </div>
         )}
       </div>
-      <div className="mt-3 text-[28px] leading-none font-bold text-slate-800 dark:text-slate-100 tabular-nums">
+      <div className="mt-3 text-[28px] leading-none font-bold text-slate-800 dark:text-neutral-100 tabular-nums">
         {value}
       </div>
       {hint && (
-        <div className="mt-1.5 text-xs text-slate-400 dark:text-slate-500">{hint}</div>
+        <div className="mt-1.5 text-xs text-slate-400 dark:text-neutral-500">{hint}</div>
       )}
       <svg
         className="mt-4 w-full text-brand-400 dark:text-brand-500"

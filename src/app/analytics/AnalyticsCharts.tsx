@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import {
@@ -85,7 +85,7 @@ export default function AnalyticsCharts({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
       <div className="card p-5">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-4">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100 mb-4">
           {a.chartPipelineByStage}
         </h2>
         <div className="h-72">
@@ -117,7 +117,7 @@ export default function AnalyticsCharts({
       </div>
 
       <div className="card p-5">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-4">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100 mb-4">
           {a.chartContactsByStatus}
         </h2>
         <div className="h-72">
@@ -149,7 +149,7 @@ export default function AnalyticsCharts({
       </div>
 
       <div className="card p-5">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-4">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100 mb-4">
           {a.chartNewContacts}
         </h2>
         <div className="h-72">
@@ -179,7 +179,7 @@ export default function AnalyticsCharts({
       </div>
 
       <div className="card p-5">
-        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-4">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100 mb-4">
           {a.chartRevenueByIndustry}
         </h2>
         <div className="h-72">

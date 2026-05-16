@@ -58,15 +58,15 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="hidden md:flex md:w-64 md:flex-col border-r border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+    <aside className="hidden md:flex md:w-64 md:flex-col border-r border-slate-100 dark:border-neutral-900 bg-white dark:bg-neutral-950">
       {/* Logo */}
-      <div className="px-5 py-6 border-b border-slate-100 dark:border-slate-800">
+      <div className="px-5 py-6 border-b border-slate-100 dark:border-neutral-900">
         <Link href="/" className="flex flex-col gap-0.5">
           <div className="text-2xl font-black tracking-tight leading-none">
             <span className="text-slate-900 dark:text-white">LIBA</span>
             <span className="text-brand-500">+</span>
           </div>
-          <div className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+          <div className="text-[11px] text-slate-400 dark:text-neutral-500 font-medium">
             CRM by Liba+
           </div>
         </Link>
@@ -84,7 +84,7 @@ export default function Sidebar() {
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                 active
                   ? "bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400"
-                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
               }`}
             >
               <span className={active ? "text-brand-500 dark:text-brand-400" : ""}>
@@ -97,17 +97,17 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom controls */}
-      <div className="px-3 py-3 border-t border-slate-100 dark:border-slate-800 space-y-0.5">
+      <div className="px-3 py-3 border-t border-slate-100 dark:border-neutral-900 space-y-0.5">
         <ThemeToggle />
         <LanguageToggle />
         <SignOutButton />
       </div>
 
       {/* Footer */}
-      <div className="px-5 py-4 border-t border-slate-100 dark:border-slate-800">
-        <p className="text-[11px] text-slate-400 dark:text-slate-500">
+      <div className="px-5 py-4 border-t border-slate-100 dark:border-neutral-900">
+        <p className="text-[11px] text-slate-400 dark:text-neutral-500">
           AI powered by{" "}
-          <span className="font-semibold text-slate-600 dark:text-slate-300">Liba</span>
+          <span className="font-semibold text-slate-600 dark:text-neutral-300">Liba</span>
           <span className="font-semibold text-brand-500">+</span>
         </p>
       </div>

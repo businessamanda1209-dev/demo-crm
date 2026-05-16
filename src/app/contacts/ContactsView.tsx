@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -177,7 +177,7 @@ export default function ContactsView({
       />
 
       <div className="card overflow-hidden">
-        <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-slate-100 dark:border-neutral-800">
           <input
             className="input max-w-xs"
             placeholder={copy.searchPlaceholder}
@@ -199,7 +199,7 @@ export default function ContactsView({
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full">
-            <thead className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700">
+            <thead className="bg-slate-50 dark:bg-neutral-900/60 border-b border-slate-200 dark:border-neutral-800">
               <tr>
                 <th className="table-th">{copy.colName}</th>
                 <th className="table-th">{copy.colTitle}</th>
@@ -211,10 +211,10 @@ export default function ContactsView({
                 <th className="table-th text-right">{copy.colActions}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
               {filtered.map((c) => (
-                <tr key={c.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
-                  <td className="table-td font-medium text-slate-900 dark:text-slate-100">
+                <tr key={c.id} className="hover:bg-slate-50/60 dark:hover:bg-neutral-900/60">
+                  <td className="table-td font-medium text-slate-900 dark:text-neutral-100">
                     {c.firstName} {c.lastName}
                   </td>
                   <td className="table-td">{c.title ?? "—"}</td>
@@ -236,7 +236,7 @@ export default function ContactsView({
                   <td className="table-td">{formatDate(c.createdAt)}</td>
                   <td className="table-td text-right whitespace-nowrap">
                     <button
-                      className="text-xs font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 mr-3"
+                      className="text-xs font-medium text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100 mr-3"
                       onClick={() => openEdit(c)}
                     >
                       {copy.edit}
@@ -252,7 +252,7 @@ export default function ContactsView({
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-sm text-slate-500 dark:text-slate-400">
+                  <td colSpan={8} className="px-4 py-10 text-center text-sm text-slate-500 dark:text-neutral-400">
                     {copy.empty}
                   </td>
                 </tr>
