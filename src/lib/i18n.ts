@@ -33,7 +33,7 @@ const en = {
     genericError: "Authentication failed. Please check your details.",
   },
   dashboard: {
-    title: "Dashboard",
+    title: (name: string) => `Welcome back, ${name}`,
     subtitle: "Snapshot of your pipeline, contacts, and accounts.",
     statCompanies: "Companies",
     statCompaniesHint: "Active accounts in your CRM",
@@ -50,7 +50,9 @@ const en = {
     closes: "Closes",
     closed: "Closed",
     noContacts: "No contacts yet.",
+    noContactsDesc: "When new contacts are added, they will appear here.",
     noDeals: "No deals yet.",
+    noDealsDesc: "When new deals are created, they will appear here.",
   },
   contacts: {
     title: "Contacts",
@@ -177,8 +179,8 @@ const ptBR: typeof en = {
     genericError: "Falha na autenticação. Confira os dados informados.",
   },
   dashboard: {
-    title: "Painel",
-    subtitle: "Visão geral do seu pipeline, contatos e contas.",
+    title: (name: string) => `Bem-vindo de volta, ${name}`,
+    subtitle: "Tenha uma visão geral do seu pipeline, contatos e contas.",
     statCompanies: "Empresas",
     statCompaniesHint: "Contas ativas no seu CRM",
     statContacts: "Contatos",
@@ -191,10 +193,12 @@ const ptBR: typeof en = {
     viewAll: "Ver todos →",
     recentDeals: "Negócios Recentes",
     viewAnalytics: "Ver análises →",
-    closes: "Fecha em",
+    closes: "Fecha",
     closed: "Fechado em",
     noContacts: "Nenhum contato ainda.",
+    noContactsDesc: "Quando novos contatos forem adicionados, eles aparecerão aqui.",
     noDeals: "Nenhum negócio ainda.",
+    noDealsDesc: "Quando novos negócios forem criados, eles aparecerão aqui.",
   },
   contacts: {
     title: "Contatos",

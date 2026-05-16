@@ -1,9 +1,9 @@
 export function formatCurrency(value: number | string | null | undefined): string {
   const n = typeof value === "string" ? parseFloat(value) : value ?? 0;
-  if (Number.isNaN(n)) return "$0";
-  return new Intl.NumberFormat("en-US", {
+  if (Number.isNaN(n)) return "R$0";
+  return new Intl.NumberFormat("pt-BR", {
     style: "currency",
-    currency: "USD",
+    currency: "BRL",
     maximumFractionDigits: 0,
   }).format(n);
 }
@@ -18,10 +18,9 @@ export function formatDate(value: Date | string | null | undefined): string {
   if (!value) return "—";
   const d = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+  return d.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
   });
 }
 

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { requireUserId } from "@/lib/auth";
+import { requireUser } from "@/lib/auth";
 import DashboardView from "./DashboardView";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +29,13 @@ type DashboardData = [
 ];
 
 export default async function DashboardPage() {
-  const userId = await requireUserId();
+  const user = await requireUser();
+  const userId = user.id;
+  const userName =
+    user.user_metadata?.full_name ||
+    user.user_metadata?.name ||
+    user.email?.split("@")[0] ||
+    "—";
   const fallback: DashboardData = [0, 0, 0, [], [], []];
   const [
     companyCount,
@@ -86,6 +92,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardView
+      userName={userName}
       companyCount={companyCount}
       contactCount={contactCount}
       customerCount={customerCount}
