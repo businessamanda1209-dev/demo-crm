@@ -2,10 +2,16 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { useLanguage } from "@/context/LanguageContext";
 import { t } from "@/lib/i18n";
 import { getSiteUrl, getSupabaseConfig } from "@/lib/supabase/env";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+
+const GradientBackground = dynamic(
+  () => import("./GradientBackground").then((m) => m.GradientBackground),
+  { ssr: false }
+);
 
 export default function LoginForm() {
   const router = useRouter();
@@ -75,95 +81,15 @@ export default function LoginForm() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: `
-        radial-gradient(ellipse at 65% 38%, rgba(255,195,50,0.75) 0%, rgba(240,130,20,0.45) 18%, transparent 48%),
-        radial-gradient(ellipse at 30% 80%, rgba(100,35,5,0.6) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 80%, rgba(80,25,5,0.5) 0%, transparent 40%),
-        linear-gradient(180deg,
-          #1A0800 0%,
-          #4A1E00 10%,
-          #8B3E00 22%,
-          #C4620A 34%,
-          #E8880A 44%,
-          #F0A020 50%,
-          #D07010 58%,
-          #904010 68%,
-          #522008 80%,
-          #2A1005 90%,
-          #100500 100%
-        )
-      `,
       fontFamily: "'Inter', system-ui, sans-serif",
       padding: "24px",
     }}>
-
-      {/* Landscape silhouettes */}
-      <svg
-        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
-        viewBox="0 0 1440 900"
-        preserveAspectRatio="xMidYMid slice"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* Hills */}
-        <ellipse cx="720" cy="980" rx="900" ry="380" fill="rgba(30,12,2,0.65)" />
-        <ellipse cx="200" cy="920" rx="500" ry="280" fill="rgba(25,10,2,0.5)" />
-        <ellipse cx="1300" cy="940" rx="550" ry="300" fill="rgba(20,8,2,0.5)" />
-
-        {/* Temple dome (right) */}
-        <g transform="translate(1080,320)" opacity="0.55">
-          <ellipse cx="0" cy="0" rx="90" ry="85" fill="rgba(90,45,5,0.8)" />
-          <rect x="-6" y="-5" width="12" height="60" fill="rgba(70,35,5,0.9)" />
-          <rect x="-70" y="55" width="140" height="18" rx="3" fill="rgba(70,35,5,0.85)" />
-          {[-56,-42,-28,-14,0,14,28,42,56].map((x, i) => (
-            <rect key={i} x={x - 3} y="20" width="6" height="38" rx="1" fill="rgba(100,50,8,0.7)" />
-          ))}
-          <rect x="-72" y="73" width="144" height="10" rx="2" fill="rgba(60,30,4,0.9)" />
-          <rect x="-90" y="83" width="180" height="12" rx="2" fill="rgba(55,25,3,0.9)" />
-        </g>
-
-        {/* Smaller pavilion */}
-        <g transform="translate(1220,430)" opacity="0.45">
-          <ellipse cx="0" cy="0" rx="45" ry="42" fill="rgba(80,40,5,0.7)" />
-          <rect x="-3" y="-3" width="6" height="35" fill="rgba(60,30,4,0.8)" />
-          <rect x="-35" y="32" width="70" height="9" rx="2" fill="rgba(60,30,4,0.75)" />
-          {[-24,-12,0,12,24].map((x, i) => (
-            <rect key={i} x={x - 2.5} y="12" width="5" height="22" rx="1" fill="rgba(90,45,7,0.65)" />
-          ))}
-          <rect x="-38" y="41" width="76" height="8" rx="2" fill="rgba(50,22,3,0.8)" />
-        </g>
-
-        {/* Cypress trees left */}
-        {[120, 180, 80, 220, 60].map((x, i) => (
-          <ellipse key={i} cx={x} cy={560 + i * 18} rx={12 - i * 1.5} ry={80 + i * 10} fill={`rgba(15,40,10,${0.5 + i * 0.05})`} />
-        ))}
-
-        {/* Cypress trees right */}
-        {[1320, 1370, 1280, 1400, 1250].map((x, i) => (
-          <ellipse key={i} cx={x} cy={580 + i * 15} rx={10 - i} ry={70 + i * 8} fill={`rgba(12,35,8,${0.45 + i * 0.05})`} />
-        ))}
-
-        {/* Staircase silhouette */}
-        <g transform="translate(1050,620)" opacity="0.5">
-          {[0,1,2,3,4].map(i => (
-            <rect key={i} x={i * 18} y={i * 10} width={180 - i * 18} height="8" rx="1" fill="rgba(60,25,5,0.8)" />
-          ))}
-        </g>
-
-        {/* Ground overlay */}
-        <rect x="0" y="750" width="1440" height="150" fill="rgba(10,4,0,0.7)" />
-
-        {/* Sun glow orb */}
-        <radialGradient id="sun" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="rgba(255,230,100,0.9)" />
-          <stop offset="40%" stopColor="rgba(255,170,30,0.5)" />
-          <stop offset="100%" stopColor="rgba(255,130,0,0)" />
-        </radialGradient>
-        <ellipse cx="940" cy="340" rx="70" ry="65" fill="url(#sun)" />
-      </svg>
+      {/* Craft gradient background — client-only to avoid hydration mismatch */}
+      <GradientBackground />
 
       {/* Glass panel */}
       <div style={{
-        position: "relative",
+        position: "relative", zIndex: 1,
         width: "100%",
         maxWidth: "960px",
         minHeight: "580px",
