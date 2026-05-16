@@ -1,0 +1,146 @@
+import { prisma } from "@/lib/prisma";
+import { requireUserId } from "@/lib/auth";
+import AnalyticsView from "./AnalyticsView";
+
+export const dynamic = "force-dynamic";
+
+export default async function AnalyticsPage() {
+  const userId = await requireUserId();
+  const [contacts, deals, companies] = await Promise.all([
+    prisma.contact.findMany({
+      where: { userId },
+      select: { status: true, createdAt: true },
+    }),
+    prisma.deal.findMany({
+      where: { userId },
+      select: {
+        stage: true,
+        value: true,
+        createdAt: true,
+        closedAt: true,
+        company: { select: { industry: true, name: true } },
+      },
+    }),
+    prisma.company.findMany({
+      where: { userId },
+      select: {
+        name: true,
+        industry: true,
+        annualRevenue: true,
+        _count: { select: { deals: true, contacts: true } },
+      },
+    }),
+  ]).catch(() => [[], [], []]);
+
+  // Status distribution
+  const statusCountsMap = new Map<string, number>();
+  contacts.forEach((c) => {
+    statusCountsMap.set(c.status, (statusCountsMap.get(c.status) ?? 0) + 1);
+  });
+  const statusData = Array.from(statusCountsMap.entries()).map(
+    ([name, value]) => ({ name, value }),
+  );
+
+  // Pipeline by stage
+  const stageMap = new Map<string, { count: number; value: number }>();
+  deals.forEach((d) => {
+    const cur = stageMap.get(d.stage) ?? { count: 0, value: 0 };
+    cur.count += 1;
+    cur.value += Number(d.value);
+    stageMap.set(d.stage, cur);
+  });
+  const stageOrder = [
+    "PROSPECTING",
+    "QUALIFICATION",
+    "PROPOSAL",
+    "NEGOTIATION",
+    "CLOSED_WON",
+    "CLOSED_LOST",
+  ];
+  const stageData = stageOrder
+    .map((stage) => ({
+      stage: stage.replace("_", " "),
+      count: stageMap.get(stage)?.count ?? 0,
+      value: stageMap.get(stage)?.value ?? 0,
+    }))
+    .filter((s) => s.count > 0);
+
+  // Industry revenue (from companies)
+  const industryMap = new Map<string, number>();
+  companies.forEach((c) => {
+    industryMap.set(
+      c.industry,
+      (industryMap.get(c.industry) ?? 0) + Number(c.annualRevenue),
+    );
+  });
+  const industryData = Array.from(industryMap.entries())
+    .map(([industry, revenue]) => ({ industry, revenue }))
+    .sort((a, b) => b.revenue - a.revenue);
+
+  // Monthly contact growth (last 6 months)
+  const now = new Date();
+  const monthBuckets: { label: string; key: string; count: number }[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    monthBuckets.push({
+      label: d.toLocaleString("en-US", { month: "short" }),
+      key,
+      count: 0,
+    });
+  }
+  const bucketIndex = new Map(monthBuckets.map((b, i) => [b.key, i]));
+  contacts.forEach((c) => {
+    const key = `${c.createdAt.getFullYear()}-${String(c.createdAt.getMonth() + 1).padStart(2, "0")}`;
+    const i = bucketIndex.get(key);
+    if (i !== undefined) monthBuckets[i].count += 1;
+  });
+
+  // Top companies by deal value
+  const topCompanies = companies
+    .map((c) => ({
+      name: c.name,
+      industry: c.industry,
+      contacts: c._count.contacts,
+      deals: c._count.deals,
+      revenue: Number(c.annualRevenue),
+    }))
+    .sort((a, b) => b.deals - a.deals)
+    .slice(0, 8);
+
+  const totalPipeline = deals
+    .filter((d) => d.stage !== "CLOSED_WON" && d.stage !== "CLOSED_LOST")
+    .reduce((s, d) => s + Number(d.value), 0);
+  const wonValue = deals
+    .filter((d) => d.stage === "CLOSED_WON")
+    .reduce((s, d) => s + Number(d.value), 0);
+  const closedDeals = deals.filter(
+    (d) => d.stage === "CLOSED_WON" || d.stage === "CLOSED_LOST",
+  );
+  const winRate = closedDeals.length
+    ? deals.filter((d) => d.stage === "CLOSED_WON").length / closedDeals.length
+    : 0;
+  const avgDealSize =
+    deals.length > 0
+      ? deals.reduce((s, d) => s + Number(d.value), 0) / deals.length
+      : 0;
+
+  return (
+    <AnalyticsView
+      statusData={statusData}
+      stageData={stageData}
+      industryData={industryData}
+      monthlyContacts={monthBuckets.map((b) => ({
+        month: b.label,
+        contacts: b.count,
+      }))}
+      topCompanies={topCompanies}
+      totalPipeline={totalPipeline}
+      wonValue={wonValue}
+      closedDealsLength={closedDeals.length}
+      dealsLength={deals.length}
+      winRate={winRate}
+      avgDealSize={avgDealSize}
+    />
+  );
+}

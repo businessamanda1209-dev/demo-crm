@@ -1,0 +1,93 @@
+// Prisma schema for the Demo CRM
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Company {
+  id          String    @id @default(cuid())
+  userId      String
+  name        String
+  industry    String
+  website     String?
+  employees   Int       @default(0)
+  annualRevenue Decimal @default(0) @db.Decimal(14, 2)
+  city        String?
+  country     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  contacts    Contact[]
+  deals       Deal[]
+
+  @@index([userId])
+  @@index([name])
+  @@index([industry])
+}
+
+model Contact {
+  id         String   @id @default(cuid())
+  userId     String
+  firstName  String
+  lastName   String
+  email      String
+  phone      String?
+  title      String?
+  status     ContactStatus @default(LEAD)
+  companyId  String?
+  company    Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  deals      Deal[]
+
+  @@unique([userId, email])
+  @@index([userId])
+  @@index([lastName])
+  @@index([status])
+  @@index([companyId])
+}
+
+enum ContactStatus {
+  LEAD
+  QUALIFIED
+  CUSTOMER
+  CHURNED
+}
+
+model Deal {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  value       Decimal  @default(0) @db.Decimal(14, 2)
+  stage       DealStage @default(PROSPECTING)
+  expectedCloseDate DateTime?
+  closedAt    DateTime?
+  companyId   String?
+  contactId   String?
+  company     Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact     Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([stage])
+  @@index([companyId])
+  @@index([contactId])
+}
+
+enum DealStage {
+  PROSPECTING
+  QUALIFICATION
+  PROPOSAL
+  NEGOTIATION
+  CLOSED_WON
+  CLOSED_LOST
+}
