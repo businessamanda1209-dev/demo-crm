@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirme seu e-mail – Liba+</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F9FAFB;font-family:Inter,Arial,sans-serif;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F9FAFB;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
+
+          <!-- Header / Logo -->
+          <tr>
+            <td align="center" style="padding-bottom:32px;">
+              <table cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="
+                    background-color:#2563EB;
+                    border-radius:14px;
+                    width:52px;
+                    height:52px;
+                    text-align:center;
+                    vertical-align:middle;
+                    font-family:Poppins,Arial,sans-serif;
+                    font-size:20px;
+                    font-weight:700;
+                    color:#FFFFFF;
+                    letter-spacing:-0.5px;
+                  ">L+</td>
+                  <td style="padding-left:12px;vertical-align:middle;">
+                    <span style="
+                      font-family:Poppins,Arial,sans-serif;
+                      font-size:22px;
+                      font-weight:700;
+                      color:#111827;
+                      letter-spacing:-0.3px;
+                    ">Liba+</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Card -->
+          <tr>
+            <td style="
+              background-color:#FFFFFF;
+              border-radius:16px;
+              border:1px solid #E5E7EB;
+              padding:40px 36px;
+            ">
+
+              <!-- Title -->
+              <p style="
+                margin:0 0 8px 0;
+                font-family:Poppins,Arial,sans-serif;
+                font-size:22px;
+                font-weight:700;
+                color:#111827;
+                line-height:1.3;
+              ">Confirme seu e-mail</p>
+
+              <!-- Subtitle -->
+              <p style="
+                margin:0 0 28px 0;
+                font-family:Inter,Arial,sans-serif;
+                font-size:15px;
+                color:#6B7280;
+                line-height:1.6;
+              ">Você está a um clique de acessar o seu CRM na Liba+.</p>
+
+              <!-- Divider -->
+              <div style="height:1px;background-color:#E5E7EB;margin-bottom:28px;"></div>
+
+              <!-- Body text -->
+              <p style="
+                margin:0 0 24px 0;
+                font-family:Inter,Arial,sans-serif;
+                font-size:15px;
+                color:#374151;
+                line-height:1.7;
+              ">
+                Clique no botão abaixo para confirmar seu endereço de e-mail e ativar sua conta.
+                O link é válido por <strong>24 horas</strong>.
+              </p>
+
+              <!-- CTA Button -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding-bottom:28px;">
+                    <a href="{{ .ConfirmationURL }}"
+                       style="
+                         display:inline-block;
+                         background-color:#2563EB;
+                         color:#FFFFFF;
+                         font-family:Poppins,Arial,sans-serif;
+                         font-size:15px;
+                         font-weight:600;
+                         text-decoration:none;
+                         border-radius:10px;
+                         padding:14px 32px;
+                         letter-spacing:0.1px;
+                       ">
+                      Confirmar e-mail e entrar
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Fallback link box -->
+              <div style="
+                background-color:#DBEAFE;
+                border-radius:10px;
+                padding:16px 20px;
+                margin-bottom:24px;
+              ">
+                <p style="
+                  margin:0 0 6px 0;
+                  font-family:Inter,Arial,sans-serif;
+                  font-size:12px;
+                  font-weight:600;
+                  color:#1D4ED8;
+                  text-transform:uppercase;
+                  letter-spacing:0.5px;
+                ">Botão não funcionou?</p>
+                <p style="
+                  margin:0 0 8px 0;
+                  font-family:Inter,Arial,sans-serif;
+                  font-size:13px;
+                  color:#374151;
+                  line-height:1.5;
+                ">Copie e cole o link abaixo no seu navegador:</p>
+                <p style="
+                  margin:0;
+                  font-family:Inter,Arial,sans-serif;
+                  font-size:12px;
+                  color:#2563EB;
+                  word-break:break-all;
+                  line-height:1.5;
+                ">{{ .ConfirmationURL }}</p>
+              </div>
+
+              <!-- Security note -->
+              <p style="
+                margin:0;
+                font-family:Inter,Arial,sans-serif;
+                font-size:13px;
+                color:#9CA3AF;
+                line-height:1.6;
+              ">
+                Se você não criou uma conta na Liba+, ignore este e-mail com segurança.
+                Nenhuma ação é necessária.
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding-top:28px;">
+              <p style="
+                margin:0;
+                font-family:Inter,Arial,sans-serif;
+                font-size:12px;
+                color:#9CA3AF;
+                line-height:1.6;
+              ">
+                &copy; 2026 Liba+ &nbsp;·&nbsp; Todos os direitos reservados
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

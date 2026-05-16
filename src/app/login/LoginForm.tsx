@@ -67,14 +67,16 @@ export default function LoginForm() {
     <div className="min-h-screen grid place-items-center px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 h-12 w-12 rounded-xl bg-brand-600 text-white grid place-items-center font-bold text-lg">
-            D
+          <div className="mx-auto mb-4 flex items-center justify-center gap-1">
+            <div className="h-12 w-12 rounded-xl bg-brand-600 text-white grid place-items-center font-bold text-xl tracking-tight">
+              L+
+            </div>
           </div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-            {mode === "signin" ? copy.title : copy.signUp}
+            Liba+
           </h1>
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            {copy.subtitle}
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            {mode === "signin" ? copy.subtitle : copy.signUpSubtitle}
           </p>
         </div>
 
