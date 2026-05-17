@@ -25,6 +25,8 @@ export default function LoginForm() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -49,13 +51,27 @@ export default function LoginForm() {
     setError(null);
     setMessage(null);
 
+    if (mode === "signup" && !firstName.trim()) {
+      setError("Por favor, informe seu nome."); setLoading(false); return;
+    }
+    if (mode === "signup" && !lastName.trim()) {
+      setError("Por favor, informe seu sobrenome."); setLoading(false); return;
+    }
+
     const result =
       mode === "signin"
         ? await supabase.auth.signInWithPassword({ email, password })
         : await supabase.auth.signUp({
             email,
             password,
-            options: { emailRedirectTo: `${getSiteUrl()}/` },
+            options: {
+              emailRedirectTo: `${getSiteUrl()}/`,
+              data: {
+                first_name: firstName.trim(),
+                last_name: lastName.trim(),
+                full_name: `${firstName.trim()} ${lastName.trim()}`,
+              },
+            },
           });
 
     setLoading(false);
@@ -190,6 +206,51 @@ export default function LoginForm() {
 
           {/* Form */}
           <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            {/* First + Last name — signup only */}
+            {mode === "signup" && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                <input
+                  type="text"
+                  required
+                  placeholder="Nome"
+                  value={firstName}
+                  onChange={e => setFirstName(e.target.value)}
+                  style={{
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: "10px",
+                    padding: "11px 14px",
+                    color: "#fff",
+                    fontSize: "14px",
+                    fontFamily: "inherit",
+                    outline: "none",
+                    transition: "border-color 0.15s",
+                  }}
+                  onFocus={e => (e.currentTarget.style.borderColor = "rgba(74,222,128,0.5)")}
+                  onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+                />
+                <input
+                  type="text"
+                  required
+                  placeholder="Sobrenome"
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
+                  style={{
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: "10px",
+                    padding: "11px 14px",
+                    color: "#fff",
+                    fontSize: "14px",
+                    fontFamily: "inherit",
+                    outline: "none",
+                    transition: "border-color 0.15s",
+                  }}
+                  onFocus={e => (e.currentTarget.style.borderColor = "rgba(74,222,128,0.5)")}
+                  onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+                />
+              </div>
+            )}
             {/* Email */}
             <div style={{ position: "relative" }}>
               <span style={{ position: "absolute", left: "13px", top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.3)", pointerEvents: "none" }}>
@@ -323,7 +384,7 @@ export default function LoginForm() {
               {mode === "signin" ? "Não possui uma conta? " : "Já tem conta? "}
               <button
                 type="button"
-                onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setError(null); setMessage(null); }}
+                onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setError(null); setMessage(null); setFirstName(""); setLastName(""); }}
                 style={{ background: "none", border: "none", cursor: "pointer", color: "#4ade80", fontWeight: 600, fontSize: "13.5px", fontFamily: "inherit", padding: 0 }}
               >
                 {mode === "signin" ? "Criar conta" : "Entrar"}

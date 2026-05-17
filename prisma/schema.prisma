@@ -105,6 +105,11 @@ model Meeting {
   endAt       DateTime
   meetingLink String        @unique @default(cuid())
   status      MeetingStatus @default(SCHEDULED)
+  timezone    String        @default("America/Sao_Paulo")
+  isAllDay    Boolean       @default(false)
+  location    String?
+  color       String?
+  repeatRule  String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -123,14 +128,16 @@ enum MeetingStatus {
 }
 
 model MeetingAttendee {
-  id        String   @id @default(cuid())
-  meetingId String
-  meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
-  name      String
-  email     String?
-  partyId   String?
-  status    String   @default("INVITED")
-  createdAt DateTime @default(now())
+  id              String   @id @default(cuid())
+  meetingId       String
+  meeting         Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  name            String
+  email           String?
+  responseStatus  String   @default("INVITED")
+  canInviteOthers Boolean  @default(false)
+  canSeeGuestList Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@index([meetingId])
 }
