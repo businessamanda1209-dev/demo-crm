@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/PageHeader";
 import Modal from "@/components/Modal";
@@ -122,6 +122,14 @@ function formatDateLong(d: Date) {
 
 type View = "month" | "week" | "day";
 
+type CreatedResult = {
+  id: string;
+  title: string;
+  meetingLink: string;
+  _meetingUrl: string;
+  _email: { sent: number; skipped: number; errors: string[] };
+};
+
 export default function CalendarView({ initialMeetings }: { initialMeetings: Meeting[] }) {
   const router = useRouter();
   const [meetings, setMeetings] = useState(initialMeetings);
@@ -131,6 +139,8 @@ export default function CalendarView({ initialMeetings }: { initialMeetings: Mee
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [submitting, setSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [createdResult, setCreatedResult] = useState<CreatedResult | null>(null);
+  const [copied, setCopied] = useState(false);
   const timegridRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll time grid to 7am on view change
@@ -191,6 +201,7 @@ export default function CalendarView({ initialMeetings }: { initialMeetings: Mee
       endTime: `${String(h + 1).padStart(2, "0")}:00`,
     });
     setApiError(null);
+    setCreatedResult(null);
     setOpen(true);
   }
   function openEdit(m: Meeting) {
@@ -216,6 +227,7 @@ export default function CalendarView({ initialMeetings }: { initialMeetings: Mee
       color: m.color ?? "",
     });
     setApiError(null);
+    setCreatedResult(null);
     setOpen(true);
   }
 
@@ -248,22 +260,29 @@ export default function CalendarView({ initialMeetings }: { initialMeetings: Mee
         attendees: isEdit ? undefined : attendees,
       }),
     });
+    const data = await res.json().catch(() => ({}));
     setSubmitting(false);
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
       setApiError(data.error || "Erro ao salvar. Tente novamente.");
       return;
     }
-    setOpen(false);
     router.refresh();
     if (!isEdit) {
-      const created = await res.json();
-      setMeetings(prev => [...prev, created]);
+      setMeetings(prev => [...prev, data]);
+      setCreatedResult({
+        id: data.id,
+        title: data.title,
+        meetingLink: data.meetingLink,
+        _meetingUrl: data._meetingUrl ?? `${window.location.origin}/meet/${data.meetingLink}`,
+        _email: data._email ?? { sent: 0, skipped: 0, errors: [] },
+      });
+      setCopied(false);
     } else {
       const s = new Date(startAt); const en = new Date(endAt);
       setMeetings(prev => prev.map(m => m.id === form.id
         ? { ...m, title: form.title, description: form.description || null, startAt: s.toISOString(), endAt: en.toISOString(), status: form.status, isAllDay: form.isAllDay, location: form.location || null }
         : m));
+      setOpen(false);
     }
   }
 
@@ -447,8 +466,92 @@ export default function CalendarView({ initialMeetings }: { initialMeetings: Mee
     return renderTimegrid([currentDate]);
   }
 
+  // ── Success panel ─────────────────────────────────────────────────────────────
+  function renderSuccess(r: CreatedResult) {
+    const emailOk = r._email.sent > 0;
+    const emailErr = r._email.errors.length > 0;
+    function copyLink() {
+      navigator.clipboard.writeText(r._meetingUrl).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+    }
+    return (
+      <div className="space-y-5">
+        {/* Check circle */}
+        <div className="flex flex-col items-center gap-2 pt-2 pb-1">
+          <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-500/15 flex items-center justify-center">
+            <svg className="w-7 h-7 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className="text-base font-semibold text-slate-900 dark:text-neutral-100">Reunião criada!</p>
+          <p className="text-sm text-slate-500 dark:text-neutral-400 text-center">{r.title}</p>
+        </div>
+
+        {/* Meeting link */}
+        <div className="rounded-xl border border-slate-200 dark:border-neutral-800 p-3 space-y-2">
+          <p className="text-xs font-semibold text-slate-500 dark:text-neutral-400 uppercase tracking-wide">Link da videoconferência</p>
+          <div className="flex items-center gap-2">
+            <input
+              readOnly
+              className="input flex-1 text-xs font-mono bg-slate-50 dark:bg-neutral-900 text-brand-600 dark:text-brand-400"
+              value={r._meetingUrl}
+              onFocus={e => e.target.select()}
+            />
+            <button
+              type="button"
+              onClick={copyLink}
+              className={`shrink-0 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${copied ? "bg-emerald-500 text-white" : "bg-slate-100 dark:bg-neutral-800 text-slate-700 dark:text-neutral-300 hover:bg-slate-200 dark:hover:bg-neutral-700"}`}
+            >
+              {copied ? "Copiado!" : "Copiar"}
+            </button>
+          </div>
+        </div>
+
+        {/* Email status */}
+        <div className={`rounded-xl border p-3 flex items-start gap-3 ${emailOk ? "border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10" : emailErr ? "border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10" : "border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-900"}`}>
+          <span className="text-lg leading-none">{emailOk ? "✅" : emailErr ? "⚠️" : "ℹ️"}</span>
+          <div>
+            <p className="text-sm font-semibold text-slate-800 dark:text-neutral-200">
+              {emailOk
+                ? `${r._email.sent} convite${r._email.sent > 1 ? "s" : ""} enviado${r._email.sent > 1 ? "s" : ""} com sucesso`
+                : r._email.skipped > 0
+                ? `Falha ao enviar ${r._email.skipped} convite${r._email.skipped > 1 ? "s" : ""}`
+                : "Nenhum convidado com e-mail"}
+            </p>
+            {r._email.errors.length > 0 && (
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">{r._email.errors[0]}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-3 pt-1">
+          <a
+            href={r._meetingUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="btn-primary flex-1 text-center"
+          >
+            🎥 Entrar agora
+          </a>
+          <button
+            type="button"
+            onClick={() => { setOpen(false); setCreatedResult(null); }}
+            className="btn-secondary flex-1"
+          >
+            Fechar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // ── Event form ────────────────────────────────────────────────────────────────
   function renderForm() {
+    const meetingUrl = form.id
+      ? meetings.find(m => m.id === form.id)?.meetingLink
+        ? `${typeof window !== "undefined" ? window.location.origin : ""}/meet/${meetings.find(m => m.id === form.id)!.meetingLink}`
+        : null
+      : null;
     return (
       <form onSubmit={submit} className="space-y-4">
         {apiError && <p className="text-sm text-rose-500">{apiError}</p>}
@@ -463,6 +566,17 @@ export default function CalendarView({ initialMeetings }: { initialMeetings: Mee
             onChange={e => setForm({ ...form, title: e.target.value })}
           />
         </div>
+
+        {/* Meeting link (edit mode) */}
+        {meetingUrl && (
+          <div className="rounded-xl border border-slate-200 dark:border-neutral-800 p-3 space-y-1.5">
+            <p className="text-xs font-semibold text-slate-500 dark:text-neutral-400 uppercase tracking-wide">Link da videoconferência</p>
+            <div className="flex items-center gap-2">
+              <input readOnly className="input flex-1 text-xs font-mono bg-slate-50 dark:bg-neutral-900 text-brand-600 dark:text-brand-400" value={meetingUrl} onFocus={e => e.target.select()} />
+              <a href={meetingUrl} target="_blank" rel="noreferrer" className="shrink-0 px-3 py-2 rounded-lg text-xs font-semibold bg-brand-500 text-white hover:bg-brand-600 transition">Entrar</a>
+            </div>
+          </div>
+        )}
 
         {/* All-day toggle */}
         <div className="flex items-center gap-3">
@@ -678,8 +792,12 @@ export default function CalendarView({ initialMeetings }: { initialMeetings: Mee
         );
       })()}
 
-      <Modal open={open} onClose={() => setOpen(false)} title={form.id ? "Editar Reunião" : "Nova Reunião"}>
-        {renderForm()}
+      <Modal
+        open={open}
+        onClose={() => { setOpen(false); setCreatedResult(null); }}
+        title={createdResult ? "Reunião Criada" : form.id ? "Editar Reunião" : "Nova Reunião"}
+      >
+        {createdResult ? renderSuccess(createdResult) : renderForm()}
       </Modal>
     </div>
   );

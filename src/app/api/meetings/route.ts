@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthUser } from "@/lib/auth";
 import { sendMeetingInvite } from "@/lib/email";
+import { getSiteUrl } from "@/lib/supabase/env";
 
 export async function GET() {
   const user = await getAuthUser();
@@ -66,27 +67,45 @@ export async function POST(req: NextRequest) {
       include: { attendees: true },
     });
 
-    // Send email invites (non-blocking — failure does NOT cancel the meeting)
-    sendMeetingInvite(
-      {
-        id:          meeting.id,
-        title:       meeting.title,
-        description: meeting.description,
-        startAt:     meeting.startAt,
-        endAt:       meeting.endAt,
-        isAllDay:    meeting.isAllDay,
-        location:    meeting.location,
-        meetingLink: meeting.meetingLink,
-        timezone:    meeting.timezone,
-        attendees:   meeting.attendees.map(a => ({ name: a.name, email: a.email })),
-      },
-      user.email ?? ""
-    ).catch(err => console.error("[meetings] email send failed:", err));
+    const siteUrl = getSiteUrl();
+    const meetingUrl = `${siteUrl}/meet/${meeting.meetingLink}`;
 
-    return NextResponse.json(meeting, { status: 201 });
+    // Send invites — await with timeout so result is included in response
+    let emailResult = { sent: 0, skipped: 0, errors: [] as string[] };
+    try {
+      const sendPromise = sendMeetingInvite(
+        {
+          id:          meeting.id,
+          title:       meeting.title,
+          description: meeting.description,
+          startAt:     meeting.startAt,
+          endAt:       meeting.endAt,
+          isAllDay:    meeting.isAllDay,
+          location:    meeting.location,
+          meetingLink: meeting.meetingLink,
+          timezone:    meeting.timezone,
+          attendees:   meeting.attendees.map(a => ({ name: a.name, email: a.email })),
+        },
+        user.email ?? ""
+      );
+      // 8s timeout so we don't keep the client waiting forever
+      emailResult = await Promise.race([
+        sendPromise,
+        new Promise<typeof emailResult>(r =>
+          setTimeout(() => r({ sent: 0, skipped: 0, errors: ["timeout"] }), 8000)
+        ),
+      ]);
+    } catch (emailErr) {
+      console.error("[meetings] email error:", emailErr);
+      emailResult = { sent: 0, skipped: 0, errors: [String(emailErr)] };
+    }
+
+    return NextResponse.json(
+      { ...meeting, _meetingUrl: meetingUrl, _email: emailResult },
+      { status: 201 }
+    );
   } catch (e) {
     console.error("POST /api/meetings:", e);
-    // Return the real error message so it shows in the form (helps diagnose DB schema issues)
     const msg = e instanceof Error ? e.message : String(e);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
