@@ -6,7 +6,7 @@ export async function GET() {
   const user = await getAuthUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const list = await (prisma as any).aiConversation.findMany({
+    const list = await prisma.aiConversation.findMany({
       where: { userId: user.id },
       orderBy: { updatedAt: "desc" },
       include: { _count: { select: { messages: true } } },
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const title = (body.title as string)?.trim() || "Nova conversa";
-    const conv = await (prisma as any).aiConversation.create({
+    const conv = await prisma.aiConversation.create({
       data: { userId: user.id, title },
     });
     return NextResponse.json(conv, { status: 201 });

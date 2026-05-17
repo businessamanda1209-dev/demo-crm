@@ -6,7 +6,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const user = await getAuthUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const conv = await (prisma as any).aiConversation.findFirst({
+    const conv = await prisma.aiConversation.findFirst({
       where: { id: params.id, userId: user.id },
       include: {
         messages: { orderBy: { createdAt: "asc" } },
@@ -25,7 +25,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   const user = await getAuthUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    await (prisma as any).aiConversation.deleteMany({
+    await prisma.aiConversation.deleteMany({
       where: { id: params.id, userId: user.id },
     });
     return NextResponse.json({ ok: true });

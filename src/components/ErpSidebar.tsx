@@ -98,6 +98,26 @@ const links = [
       </svg>
     ),
   },
+  {
+    href: "/erp/reconciliation",
+    label: "Conciliação Bancária",
+    icon: (
+      <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+        <path d="M4 7h16M4 12h16M4 17h10" />
+        <path d="M18 17l3 3-3 3" />
+      </svg>
+    ),
+  },
+  {
+    href: "/erp/accounting-closing",
+    label: "Fechamento Contábil",
+    icon: (
+      <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+        <path d="M9 11l3 3L22 4" />
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+      </svg>
+    ),
+  },
 ];
 
 export default function ErpSidebar() {
@@ -141,6 +161,21 @@ export default function ErpSidebar() {
             </Link>
           );
         })}
+
+        {/* Disabled — coming soon */}
+        <div
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400 dark:text-neutral-600 cursor-not-allowed select-none"
+          title="Em breve"
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+          </svg>
+          Open Finance
+          <span className="ml-auto text-[10px] uppercase tracking-wider font-semibold text-slate-300 dark:text-neutral-700">
+            em breve
+          </span>
+        </div>
       </nav>
 
       {/* Back to CRM */}
@@ -152,7 +187,7 @@ export default function ErpSidebar() {
           <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
-          Voltar ao CRM
+          Ir para o CRM
         </Link>
       </div>
 

@@ -27,12 +27,24 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const body = await req.json();
+    if (!body.categoryId) {
+      return NextResponse.json({ error: "Categoria é obrigatória." }, { status: 400 });
+    }
+    if (!body.costCenterId) {
+      return NextResponse.json({ error: "Centro de custo é obrigatório." }, { status: 400 });
+    }
+    const [cat, cc] = await Promise.all([
+      prisma.financialCategory.findFirst({ where: { id: body.categoryId, userId: user.id } }),
+      prisma.costCenter.findFirst({ where: { id: body.costCenterId, userId: user.id } }),
+    ]);
+    if (!cat) return NextResponse.json({ error: "Categoria inválida." }, { status: 400 });
+    if (!cc) return NextResponse.json({ error: "Centro de custo inválido." }, { status: 400 });
     const receivable = await prisma.receivable.create({
       data: {
         userId: user.id,
         partyId: body.partyId || null,
-        categoryId: body.categoryId || null,
-        costCenterId: body.costCenterId || null,
+        categoryId: body.categoryId,
+        costCenterId: body.costCenterId,
         accountId: body.accountId || null,
         type: body.type ?? "SERVICO",
         description: body.description,
@@ -42,6 +54,7 @@ export async function POST(req: NextRequest) {
         receivedAt: body.receivedAt ? new Date(body.receivedAt) : null,
         receivingMethod: body.receivingMethod || null,
         recurrence: body.recurrence || null,
+        referenceCode: body.referenceCode || null,
         notes: body.notes || null,
         status: body.status ?? "OPEN",
       },

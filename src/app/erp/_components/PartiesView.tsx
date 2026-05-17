@@ -32,6 +32,7 @@ const EMPTY = {
   mobile: "",
   notes: "",
   active: true,
+  alsoOtherRole: false,
 };
 
 export default function PartiesView({ initialParties, role }: { initialParties: Party[]; role: Role }) {
@@ -76,6 +77,7 @@ export default function PartiesView({ initialParties, role }: { initialParties: 
       mobile: p.mobile ?? "",
       notes: p.notes ?? "",
       active: p.active,
+      alsoOtherRole: isCustomer ? p.isSupplier : p.isCustomer,
     });
     setError(null); setOpen(true);
   }
@@ -85,10 +87,11 @@ export default function PartiesView({ initialParties, role }: { initialParties: 
     setError(null);
     if (!form.legalName.trim()) { setError("Nome / Razão social é obrigatório."); return; }
     setSubmitting(true);
+    const { alsoOtherRole, ...rest } = form;
     const payload = {
-      ...form,
-      isCustomer,
-      isSupplier: !isCustomer,
+      ...rest,
+      isCustomer: isCustomer || (!isCustomer && alsoOtherRole),
+      isSupplier: !isCustomer || (isCustomer && alsoOtherRole),
     };
     const isEdit = !!form.id;
     const res = await fetch(isEdit ? `/api/erp/parties/${form.id}` : "/api/erp/parties", {
@@ -98,13 +101,21 @@ export default function PartiesView({ initialParties, role }: { initialParties: 
     });
     setSubmitting(false);
     if (!res.ok) { setError("Erro ao salvar."); return; }
+    const saved = await res.json().catch(() => null);
     if (isEdit) {
       setParties((prev) => prev.map((p) => (p.id === form.id ? { ...p, ...payload } as Party : p)));
     } else {
-      const created = await res.json();
-      setParties((prev) => [...prev, created]);
+      if (saved?._existed) {
+        // Same document already existed; show a friendly note and add to list if relevant
+        setError(`Já existia um cadastro com este CPF/CNPJ — atualizamos o registro existente.`);
+        if ((isCustomer && saved.isCustomer) || (!isCustomer && saved.isSupplier)) {
+          setParties((prev) => prev.some((x) => x.id === saved.id) ? prev : [...prev, saved]);
+        }
+      } else if (saved) {
+        setParties((prev) => [...prev, saved]);
+      }
     }
-    setOpen(false);
+    if (!saved?._existed) setOpen(false);
   }
 
   async function remove(id: string) {
@@ -245,6 +256,17 @@ export default function PartiesView({ initialParties, role }: { initialParties: 
             <div className="sm:col-span-2">
               <label className="label">Observações</label>
               <textarea className="input" rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="flex items-center gap-2 cursor-pointer text-sm">
+                <input
+                  type="checkbox"
+                  className="accent-brand-500"
+                  checked={form.alsoOtherRole}
+                  onChange={(e) => setForm({ ...form, alsoOtherRole: e.target.checked })}
+                />
+                {isCustomer ? "Também usar como fornecedor" : "Também usar como cliente"}
+              </label>
             </div>
           </div>
 

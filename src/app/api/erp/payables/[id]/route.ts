@@ -7,12 +7,18 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const body = await req.json();
+    if ("categoryId" in body && !body.categoryId) {
+      return NextResponse.json({ error: "Categoria é obrigatória." }, { status: 400 });
+    }
+    if ("costCenterId" in body && !body.costCenterId) {
+      return NextResponse.json({ error: "Centro de custo é obrigatório." }, { status: 400 });
+    }
     await prisma.payable.updateMany({
       where: { id: params.id, userId: user.id },
       data: {
         partyId: body.partyId || null,
-        categoryId: body.categoryId || null,
-        costCenterId: body.costCenterId || null,
+        categoryId: body.categoryId,
+        costCenterId: body.costCenterId,
         accountId: body.accountId || null,
         description: body.description,
         amount: body.amount !== undefined ? parseFloat(body.amount) : undefined,
@@ -20,6 +26,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         dueDate: body.dueDate ? new Date(body.dueDate) : undefined,
         paidAt: body.paidAt ? new Date(body.paidAt) : null,
         paymentMethod: body.paymentMethod || null,
+        referenceCode: body.referenceCode || null,
         status: body.status,
         notes: body.notes || null,
       },

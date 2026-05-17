@@ -11,7 +11,7 @@ export default async function LibaAiPage() {
 
   let conversations: any[] = [];
   try {
-    conversations = await (prisma as any).aiConversation.findMany({
+    conversations = await prisma.aiConversation.findMany({
       where: { userId: user.id },
       orderBy: { updatedAt: "desc" },
       take: 30,

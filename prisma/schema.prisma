@@ -290,10 +290,14 @@ model Payable {
   paidAt         DateTime?
   paymentMethod  String?
   recurrence     String?
+  referenceCode  String?
   notes          String?
   status         PayableStatus @default(OPEN)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+
+  attachments      Attachment[]
+  bankTransactions BankTransaction[]
 
   @@index([userId])
   @@index([userId, status])
@@ -329,10 +333,14 @@ model Receivable {
   receivedAt      DateTime?
   receivingMethod String?
   recurrence      String?
+  referenceCode   String?
   notes           String?
   status          ReceivableStatus @default(OPEN)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
+
+  attachments      Attachment[]
+  bankTransactions BankTransaction[]
 
   @@index([userId])
   @@index([userId, status])
@@ -417,6 +425,62 @@ model AiMessage {
 
   @@index([conversationId])
   @@index([conversationId, createdAt])
+}
+
+// ─── Attachments ──────────────────────────────────────────────
+
+model Attachment {
+  id           String      @id @default(cuid())
+  userId       String
+  payableId    String?
+  payable      Payable?    @relation(fields: [payableId], references: [id], onDelete: Cascade)
+  receivableId String?
+  receivable   Receivable? @relation(fields: [receivableId], references: [id], onDelete: Cascade)
+  filename     String
+  fileUrl      String
+  fileType     String   // "invoice", "fiscal_doc", "other"
+  description  String?
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([payableId])
+  @@index([receivableId])
+}
+
+// ─── Bank reconciliation ──────────────────────────────────────
+
+model BankImportBatch {
+  id           String            @id @default(cuid())
+  userId       String
+  accountId    String?
+  filename     String
+  importedAt   DateTime          @default(now())
+  transactions BankTransaction[]
+
+  @@index([userId])
+}
+
+model BankTransaction {
+  id           String          @id @default(cuid())
+  batchId      String
+  batch        BankImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  userId       String
+  accountId    String?
+  date         DateTime
+  amount       Decimal         @db.Decimal(15, 2)
+  description  String
+  type         String          // CREDIT or DEBIT
+  externalId   String?
+  reconciled   Boolean         @default(false)
+  payableId    String?
+  payable      Payable?        @relation(fields: [payableId], references: [id], onDelete: SetNull)
+  receivableId String?
+  receivable   Receivable?     @relation(fields: [receivableId], references: [id], onDelete: SetNull)
+  createdAt    DateTime        @default(now())
+
+  @@index([userId])
+  @@index([batchId])
+  @@unique([batchId, externalId])
 }
 
 model AiDraftAction {

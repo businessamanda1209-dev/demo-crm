@@ -7,7 +7,7 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const action = await (prisma as any).aiDraftAction.findFirst({
+    const action = await prisma.aiDraftAction.findFirst({
       where: { id: params.id, userId: user.id },
     });
     if (!action) return NextResponse.json({ error: "Ação não encontrada" }, { status: 404 });
@@ -97,7 +97,7 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
           throw new Error(`Tipo desconhecido: ${action.type}`);
       }
 
-      const updated = await (prisma as any).aiDraftAction.update({
+      const updated = await prisma.aiDraftAction.update({
         where: { id: action.id },
         data: { status: "EXECUTED", targetId, errorMessage: null },
       });
@@ -105,7 +105,7 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
     } catch (execErr) {
       const msg = execErr instanceof Error ? execErr.message : String(execErr);
       console.error("[ai action execute]", execErr);
-      const updated = await (prisma as any).aiDraftAction.update({
+      const updated = await prisma.aiDraftAction.update({
         where: { id: action.id },
         data: { status: "FAILED", errorMessage: msg },
       });

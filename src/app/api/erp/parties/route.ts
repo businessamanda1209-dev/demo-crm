@@ -30,11 +30,31 @@ export async function POST(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const body = await req.json();
+
+    // ─── De-dup by CPF/CNPJ ────────────────────────────────
+    const rawDoc = (body.document || "").toString().trim();
+    if (rawDoc) {
+      const existing = await prisma.party.findFirst({
+        where: { userId: user.id, document: rawDoc },
+      });
+      if (existing) {
+        const data: Record<string, unknown> = {};
+        if (body.isCustomer && !existing.isCustomer) data.isCustomer = true;
+        if (body.isSupplier && !existing.isSupplier) data.isSupplier = true;
+        if (body.isTransporter && !existing.isTransporter) data.isTransporter = true;
+        if (!existing.active && body.active !== false) data.active = true;
+        const merged = Object.keys(data).length
+          ? await prisma.party.update({ where: { id: existing.id }, data })
+          : existing;
+        return NextResponse.json({ ...merged, _existed: true }, { status: 200 });
+      }
+    }
+
     const party = await prisma.party.create({
       data: {
         userId: user.id,
         personType: body.personType ?? "PESSOA_JURIDICA",
-        document: body.document || null,
+        document: rawDoc || null,
         tradeName: body.tradeName || null,
         legalName: body.legalName,
         isCustomer: body.isCustomer ?? false,

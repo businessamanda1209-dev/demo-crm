@@ -10,9 +10,10 @@ export default async function PayablesPage() {
     prisma.payable.findMany({
       where: { userId: user.id },
       include: {
-        party: { select: { id: true, legalName: true, tradeName: true } },
+        party: { select: { id: true, legalName: true, tradeName: true, document: true } },
         category: { select: { id: true, description: true } },
         account: { select: { id: true, name: true } },
+        costCenter: { select: { id: true, name: true, code: true } },
       },
       orderBy: { dueDate: "asc" },
     }).catch(() => []),

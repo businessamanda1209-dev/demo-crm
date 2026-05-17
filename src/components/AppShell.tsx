@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
-import ErpShell from "@/components/ErpShell";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -16,7 +15,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   if (pathname.startsWith("/erp")) {
-    return <ErpShell>{children}</ErpShell>;
+    // The /erp segment owns its own layout (src/app/erp/layout.tsx), which
+    // wraps children in ErpShell on the server with the authenticated user.
+    return <>{children}</>;
   }
 
   return (

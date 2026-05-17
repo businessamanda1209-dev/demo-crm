@@ -11,13 +11,13 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const text = (body.content as string)?.trim();
     if (!text) return NextResponse.json({ error: "Mensagem vazia" }, { status: 400 });
 
-    const conv = await (prisma as any).aiConversation.findFirst({
+    const conv = await prisma.aiConversation.findFirst({
       where: { id: params.id, userId: user.id },
     });
     if (!conv) return NextResponse.json({ error: "Conversa não encontrada" }, { status: 404 });
 
     // Save user message
-    const userMsg = await (prisma as any).aiMessage.create({
+    const userMsg = await prisma.aiMessage.create({
       data: { conversationId: conv.id, role: "USER", content: text },
     });
 
@@ -25,14 +25,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const result = await processMessage(text);
 
     // Save assistant message
-    const assistantMsg = await (prisma as any).aiMessage.create({
+    const assistantMsg = await prisma.aiMessage.create({
       data: { conversationId: conv.id, role: "ASSISTANT", content: result.assistant },
     });
 
     // Save draft actions
     const actions = [] as any[];
     for (const a of result.actions) {
-      const action = await (prisma as any).aiDraftAction.create({
+      const action = await prisma.aiDraftAction.create({
         data: {
           conversationId: conv.id,
           userId: user.id,
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
 
     // Update conversation timestamp + title (first user message)
-    await (prisma as any).aiConversation.update({
+    await prisma.aiConversation.update({
       where: { id: conv.id },
       data: {
         updatedAt: new Date(),

@@ -3,11 +3,21 @@
 import { useMemo, useState } from "react";
 import PageHeader from "@/components/PageHeader";
 import Modal from "@/components/Modal";
+import SlideOver from "@/components/SlideOver";
+import AttachmentsSection from "@/components/AttachmentsSection";
 import PartySelector, { PartyOption } from "@/components/PartySelector";
 import PeriodFilter from "@/components/PeriodFilter";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { parseBRL, formatBRLInput } from "@/lib/currency";
 import { defaultPeriod, inPeriod, PeriodState } from "@/lib/period";
+
+function fmtBRL(n: number) {
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(n);
+}
+function fmtFullDate(v: string | null | undefined) {
+  if (!v) return "—";
+  try { return new Date(v).toLocaleDateString("pt-BR"); } catch { return "—"; }
+}
 
 type Party = { id: string; legalName: string; tradeName: string | null; document?: string | null };
 type Category = { id: string; description: string };
@@ -24,6 +34,7 @@ type Payable = {
   paidAt: string | null;
   paymentMethod: string | null;
   recurrence: string | null;
+  referenceCode?: string | null;
   notes: string | null;
   partyId: string | null;
   categoryId: string | null;
@@ -32,6 +43,7 @@ type Payable = {
   party: Party | null;
   category: Category | null;
   account: Account | null;
+  costCenter?: { id: string; name: string; code: string } | null;
 };
 
 const STATUS_LABELS: Record<string, string> = { OPEN: "Em aberto", SCHEDULED: "Agendado", PAID: "Pago", OVERDUE: "Vencido" };
@@ -75,6 +87,7 @@ export default function PayablesView({ initialPayables, parties: initialParties,
   const [period, setPeriod] = useState<PeriodState>(defaultPeriod());
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({ ...EMPTY_FILTERS });
+  const [detail, setDetail] = useState<Payable | null>(null);
 
   const activeFilterCount = useMemo(() => {
     let n = 0;
@@ -138,6 +151,8 @@ export default function PayablesView({ initialPayables, parties: initialParties,
     const amount = parseBRL(form.amount);
     if (!amount || amount <= 0) { setError("Informe um valor maior que zero."); return; }
     if (!form.dueDate) { setError("Vencimento é obrigatório."); return; }
+    if (!form.categoryId) { setError("Categoria é obrigatória."); return; }
+    if (!form.costCenterId) { setError("Centro de custo é obrigatório."); return; }
 
     setSubmitting(true);
     const status = form.paid ? "PAID" : (form.status || "OPEN");
@@ -152,9 +167,10 @@ export default function PayablesView({ initialPayables, parties: initialParties,
       recurrence: form.recurrence || null,
       notes: form.notes || null,
       partyId: form.partyId || null,
-      categoryId: form.categoryId || null,
-      costCenterId: form.costCenterId || null,
+      categoryId: form.categoryId,
+      costCenterId: form.costCenterId,
       accountId: form.accountId || null,
+      referenceCode: form.referenceCode || null,
     };
     const isEdit = !!form.id;
     const res = await fetch(isEdit ? `/api/erp/payables/${form.id}` : "/api/erp/payables", {
@@ -163,7 +179,11 @@ export default function PayablesView({ initialPayables, parties: initialParties,
       body: JSON.stringify(payload),
     });
     setSubmitting(false);
-    if (!res.ok) { setError("Erro ao salvar."); return; }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      setError(err.error || "Erro ao salvar.");
+      return;
+    }
     if (isEdit) {
       const party = parties.find((p) => p.id === payload.partyId) ?? null;
       const category = categories.find((c) => c.id === payload.categoryId) ?? null;
@@ -187,6 +207,7 @@ export default function PayablesView({ initialPayables, parties: initialParties,
     if (!confirm("Excluir esta despesa?")) return;
     await fetch(`/api/erp/payables/${id}`, { method: "DELETE" });
     setPayables((prev) => prev.filter((p) => p.id !== id));
+    if (detail?.id === id) setDetail(null);
   }
 
   function onPartyCreated(p: PartyOption) {
@@ -196,7 +217,17 @@ export default function PayablesView({ initialPayables, parties: initialParties,
   return (
     <div>
       <PageHeader title="Contas a Pagar" subtitle="Gerencie suas despesas e compromissos financeiros."
-        actions={<button onClick={openNew} className="btn-primary">+ Nova despesa</button>} />
+        actions={
+          <div className="flex items-center gap-2">
+            <a
+              href="/api/erp/export/payables"
+              className="btn-secondary text-sm"
+            >
+              Exportar XLSX
+            </a>
+            <button onClick={openNew} className="btn-primary">+ Nova despesa</button>
+          </div>
+        } />
 
       <div className="mb-4">
         <PeriodFilter value={period} onChange={setPeriod} />
@@ -298,13 +329,17 @@ export default function PayablesView({ initialPayables, parties: initialParties,
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
               {filtered.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-50/60 dark:hover:bg-neutral-900/40">
+                <tr
+                  key={p.id}
+                  className="hover:bg-slate-50/60 dark:hover:bg-neutral-900/40 cursor-pointer"
+                  onClick={() => setDetail(p)}
+                >
                   <td className="table-td text-slate-500 dark:text-neutral-400">{p.party?.tradeName || p.party?.legalName || "—"}</td>
                   <td className="table-td font-medium text-slate-900 dark:text-neutral-100">{p.description}</td>
                   <td className="table-td">{formatDate(p.dueDate)}</td>
                   <td className="table-td text-right font-semibold tabular-nums">{formatCurrency(p.amount)}</td>
                   <td className="table-td"><span className={`pill ${STATUS_COLORS[p.status] ?? ""}`}>{STATUS_LABELS[p.status] ?? p.status}</span></td>
-                  <td className="table-td text-right">
+                  <td className="table-td text-right" onClick={(e) => e.stopPropagation()}>
                     <button onClick={() => openEdit(p)} className="text-xs font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 mr-3">Editar</button>
                     <button onClick={() => remove(p.id)} className="text-xs font-medium text-rose-500 hover:text-rose-700">Excluir</button>
                   </td>
@@ -350,16 +385,16 @@ export default function PayablesView({ initialPayables, parties: initialParties,
                 <input className="input" required inputMode="decimal" placeholder="0,00" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
               </div>
               <div>
-                <label className="label">Categoria</label>
-                <select className="input" value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })}>
-                  <option value="">— Nenhuma —</option>
+                <label className="label">Categoria *</label>
+                <select className="input" required value={form.categoryId} onChange={(e) => setForm({ ...form, categoryId: e.target.value })}>
+                  <option value="">— Selecione —</option>
                   {categories.map((c) => <option key={c.id} value={c.id}>{c.description}</option>)}
                 </select>
               </div>
               <div>
-                <label className="label">Centro de custo</label>
-                <select className="input" value={form.costCenterId} onChange={(e) => setForm({ ...form, costCenterId: e.target.value })}>
-                  <option value="">— Nenhum —</option>
+                <label className="label">Centro de custo *</label>
+                <select className="input" required value={form.costCenterId} onChange={(e) => setForm({ ...form, costCenterId: e.target.value })}>
+                  <option value="">— Selecione —</option>
                   {costCenters.map((c) => <option key={c.id} value={c.id}>{c.code} — {c.name}</option>)}
                 </select>
               </div>
@@ -408,12 +443,64 @@ export default function PayablesView({ initialPayables, parties: initialParties,
             </div>
           </section>
 
+          {form.id && (
+            <>
+              <div className="border-t border-slate-100 dark:border-neutral-800" />
+              <AttachmentsSection payableId={form.id} />
+            </>
+          )}
+
           <div className="flex justify-end gap-3 pt-2 border-t border-slate-100 dark:border-neutral-800">
             <button type="button" onClick={() => setOpen(false)} className="btn-secondary">Cancelar</button>
             <button type="submit" disabled={submitting} className="btn-primary">{submitting ? "Salvando..." : "Salvar"}</button>
           </div>
         </form>
       </Modal>
+
+      <SlideOver
+        open={!!detail}
+        onClose={() => setDetail(null)}
+        title={detail ? detail.description : "Detalhe"}
+      >
+        {detail && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <span className={`pill ${STATUS_COLORS[detail.status] ?? ""}`}>{STATUS_LABELS[detail.status] ?? detail.status}</span>
+              <span className="text-xl font-bold tabular-nums">{fmtBRL(detail.amount)}</span>
+            </div>
+            <dl className="grid grid-cols-1 gap-x-3 gap-y-2 text-sm">
+              <Field label="Fornecedor" value={detail.party?.tradeName || detail.party?.legalName || "—"} />
+              <Field label="Descrição" value={detail.description} />
+              <Field label="Data de competência" value={fmtFullDate(detail.competenceDate)} />
+              <Field label="Vencimento" value={fmtFullDate(detail.dueDate)} />
+              <Field label="Data de pagamento" value={fmtFullDate(detail.paidAt)} />
+              <Field label="Categoria" value={detail.category?.description || "—"} />
+              <Field label="Centro de custo" value={detail.costCenter ? `${detail.costCenter.code} — ${detail.costCenter.name}` : "—"} />
+              <Field label="Conta financeira" value={detail.account?.name || "—"} />
+              <Field label="Forma de pagamento" value={detail.paymentMethod || "—"} />
+              <Field label="Código de referência" value={detail.referenceCode || "—"} />
+              <Field label="Observações" value={detail.notes || "—"} />
+            </dl>
+            <div className="border-t border-slate-100 dark:border-neutral-800 pt-4">
+              <AttachmentsSection payableId={detail.id} />
+            </div>
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100 dark:border-neutral-800">
+              <button onClick={() => { const p = detail; setDetail(null); openEdit(p); }} className="btn-primary text-sm">Editar</button>
+              <a href={`/api/erp/export/payables`} className="btn-secondary text-sm">Exportar XLSX</a>
+              <button onClick={() => remove(detail.id)} className="text-sm font-medium text-rose-500 hover:text-rose-700 ml-auto">Excluir</button>
+            </div>
+          </div>
+        )}
+      </SlideOver>
+    </div>
+  );
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="grid grid-cols-[140px,1fr] gap-2 items-baseline">
+      <dt className="text-[11px] uppercase tracking-wide font-semibold text-slate-400 dark:text-neutral-500">{label}</dt>
+      <dd className="text-slate-800 dark:text-neutral-200 break-words">{value}</dd>
     </div>
   );
 }
