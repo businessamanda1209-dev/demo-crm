@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import PageHeader from "@/components/PageHeader";
 import Modal from "@/components/Modal";
 
@@ -9,7 +8,6 @@ type Category = { id: string; type: string; description: string; active: boolean
 const EMPTY: Omit<Category, "id"> & { id?: string } = { type: "EXPENSE", description: "", active: true };
 
 export default function CategoriesView({ initialCategories }: { initialCategories: Category[] }) {
-  const router = useRouter();
   const [cats, setCats] = useState(initialCategories);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<typeof EMPTY>(EMPTY);
@@ -37,7 +35,6 @@ export default function CategoriesView({ initialCategories }: { initialCategorie
       const created = await res.json();
       setCats((prev) => [...prev, created]);
     }
-    router.refresh();
   }
 
   async function remove(id: string) {

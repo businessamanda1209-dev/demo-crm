@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth";
 
 export async function GET() {
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const user = await requireUser();
     const receivables = await prisma.receivable.findMany({
       where: { userId: user.id },
       include: {
@@ -15,12 +16,16 @@ export async function GET() {
       orderBy: { dueDate: "asc" },
     });
     return NextResponse.json(receivables);
-  } catch { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
+  } catch (e) {
+    console.error("[receivables GET]", e);
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
+  }
 }
 
 export async function POST(req: NextRequest) {
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const user = await requireUser();
     const body = await req.json();
     const receivable = await prisma.receivable.create({
       data: {
@@ -47,5 +52,8 @@ export async function POST(req: NextRequest) {
       },
     });
     return NextResponse.json(receivable, { status: 201 });
-  } catch { return NextResponse.json({ error: "Failed" }, { status: 500 }); }
+  } catch (e) {
+    console.error("[receivables POST]", e);
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
+  }
 }

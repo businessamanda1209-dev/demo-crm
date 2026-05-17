@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ReceivablesPage() {
   const user = await requireUser();
-  const [receivables, parties, categories, accounts] = await Promise.all([
+  const [receivables, parties, categories, accounts, costCenters] = await Promise.all([
     prisma.receivable.findMany({
       where: { userId: user.id },
       include: {
@@ -16,9 +16,10 @@ export default async function ReceivablesPage() {
       },
       orderBy: { dueDate: "asc" },
     }).catch(() => []),
-    prisma.party.findMany({ where: { userId: user.id, isCustomer: true, active: true }, select: { id: true, legalName: true, tradeName: true }, orderBy: { legalName: "asc" } }).catch(() => []),
+    prisma.party.findMany({ where: { userId: user.id, isCustomer: true, active: true }, select: { id: true, legalName: true, tradeName: true, document: true }, orderBy: { legalName: "asc" } }).catch(() => []),
     prisma.financialCategory.findMany({ where: { userId: user.id, type: "REVENUE", active: true }, select: { id: true, description: true }, orderBy: { description: "asc" } }).catch(() => []),
     prisma.financialAccount.findMany({ where: { userId: user.id, canReceive: true, active: true }, select: { id: true, name: true }, orderBy: { name: "asc" } }).catch(() => []),
+    prisma.costCenter.findMany({ where: { userId: user.id, active: true }, select: { id: true, name: true, code: true }, orderBy: { code: "asc" } }).catch(() => []),
   ]);
 
   const serialized = receivables.map((r) => ({
@@ -31,5 +32,5 @@ export default async function ReceivablesPage() {
     updatedAt: r.updatedAt.toISOString(),
   }));
 
-  return <ReceivablesView initialReceivables={serialized} parties={parties} categories={categories} accounts={accounts} />;
+  return <ReceivablesView initialReceivables={serialized} parties={parties} categories={categories} accounts={accounts} costCenters={costCenters} />;
 }

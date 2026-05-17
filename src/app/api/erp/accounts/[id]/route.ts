@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth";
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const user = await requireUser();
     const body = await req.json();
     const account = await prisma.financialAccount.updateMany({
       where: { id: params.id, userId: user.id },
@@ -23,17 +24,20 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     });
     if (account.count === 0) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (e) {
+    console.error("[accounts PATCH]", e);
     return NextResponse.json({ error: "Failed to update" }, { status: 500 });
   }
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const user = await requireUser();
     await prisma.financialAccount.deleteMany({ where: { id: params.id, userId: user.id } });
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (e) {
+    console.error("[accounts DELETE]", e);
     return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
   }
 }

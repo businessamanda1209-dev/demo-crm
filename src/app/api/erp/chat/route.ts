@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth";
 
 export async function GET() {
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const user = await requireUser();
     let thread = await prisma.chatThread.findUnique({
       where: { userId: user.id },
       include: { messages: { orderBy: { createdAt: "asc" } } },
@@ -26,12 +27,16 @@ export async function GET() {
       });
     }
     return NextResponse.json({ threadId: thread.id, messages: thread.messages });
-  } catch { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
+  } catch (e) {
+    console.error("[chat GET]", e);
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
+  }
 }
 
 export async function POST(req: NextRequest) {
+  const user = await getAuthUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const user = await requireUser();
     const { content } = await req.json();
     if (!content?.trim()) return NextResponse.json({ error: "Empty" }, { status: 400 });
 
@@ -52,5 +57,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ threadId: thread.id, messages });
-  } catch { return NextResponse.json({ error: "Failed" }, { status: 500 }); }
+  } catch (e) {
+    console.error("[chat POST]", e);
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
+  }
 }

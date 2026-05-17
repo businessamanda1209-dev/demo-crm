@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import PageHeader from "@/components/PageHeader";
 import Modal from "@/components/Modal";
 
@@ -9,7 +8,6 @@ type CC = { id: string; code: string; name: string; active: boolean };
 const EMPTY: Omit<CC, "id"> & { id?: string } = { code: "", name: "", active: true };
 
 export default function CostCentersView({ initialCostCenters }: { initialCostCenters: CC[] }) {
-  const router = useRouter();
   const [ccs, setCcs] = useState(initialCostCenters);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<typeof EMPTY>(EMPTY);
@@ -37,7 +35,6 @@ export default function CostCentersView({ initialCostCenters }: { initialCostCen
       const created = await res.json();
       setCcs((prev) => [...prev, created]);
     }
-    router.refresh();
   }
 
   async function remove(id: string) {
