@@ -59,10 +59,12 @@ export default function PartySelector({
     return o.tradeName?.trim() || o.legalName;
   }
 
-  async function submitNew(e: React.FormEvent) {
-    e.preventDefault();
-    if (!form.name.trim()) return;
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  async function submitNew() {
+    if (!form.name.trim()) { setCreateError("Nome é obrigatório."); return; }
     setSubmitting(true);
+    setCreateError(null);
     try {
       const res = await fetch("/api/erp/parties", {
         method: "POST",
@@ -76,15 +78,28 @@ export default function PartySelector({
           isSupplier: role === "supplier",
         }),
       });
-      if (res.ok) {
-        const np = await res.json();
-        onCreated?.(np);
-        onChange({ id: np.id, name: displayName(np) });
-        setOpen(false); setCreating(false);
-        setForm({ name: "", document: "", email: "", phone: "" });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setCreateError(err.error || "Erro ao salvar.");
+        return;
       }
+      const np = await res.json();
+      onCreated?.(np);
+      onChange({ id: np.id, name: displayName(np) });
+      setOpen(false); setCreating(false);
+      setForm({ name: "", document: "", email: "", phone: "" });
+    } catch (e) {
+      setCreateError(String(e));
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.stopPropagation();
+      submitNew();
     }
   }
 
@@ -142,16 +157,24 @@ export default function PartySelector({
               </button>
             </>
           ) : (
-            <form onSubmit={submitNew} className="p-3 space-y-2">
-              <input className="input" placeholder="Nome *" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-              <input className="input" placeholder="CPF / CNPJ" value={form.document} onChange={(e) => setForm({ ...form, document: e.target.value })} />
-              <input className="input" placeholder="E-mail" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-              <input className="input" placeholder="Telefone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <div className="p-3 space-y-2" onClick={(e) => e.stopPropagation()}>
+              {createError && <p className="text-xs text-rose-500">{createError}</p>}
+              <input autoFocus className="input" placeholder="Nome *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} onKeyDown={handleKeyDown} />
+              <input className="input" placeholder="CPF / CNPJ" value={form.document} onChange={(e) => setForm({ ...form, document: e.target.value })} onKeyDown={handleKeyDown} />
+              <input className="input" placeholder="E-mail" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} onKeyDown={handleKeyDown} />
+              <input className="input" placeholder="Telefone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} onKeyDown={handleKeyDown} />
               <div className="flex justify-end gap-2 pt-1">
-                <button type="button" className="btn-secondary text-xs px-3 py-1.5" onClick={() => setCreating(false)}>Cancelar</button>
-                <button type="submit" disabled={submitting} className="btn-primary text-xs px-3 py-1.5">{submitting ? "Salvando..." : "Salvar"}</button>
+                <button type="button" className="btn-secondary text-xs px-3 py-1.5" onClick={() => { setCreating(false); setCreateError(null); }}>Cancelar</button>
+                <button
+                  type="button"
+                  disabled={submitting}
+                  className="btn-primary text-xs px-3 py-1.5"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); submitNew(); }}
+                >
+                  {submitting ? "Salvando..." : "Salvar"}
+                </button>
               </div>
-            </form>
+            </div>
           )}
         </div>
       )}

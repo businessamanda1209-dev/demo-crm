@@ -4,6 +4,17 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 
 type Participant = { id: string; name: string; muted: boolean; videoOff: boolean; isMe: boolean };
+type MeetingInfo = {
+  id: string;
+  title: string;
+  startAt: string;
+  endAt: string;
+  isAllDay: boolean;
+  location: string | null;
+  meetingLink: string;
+  timezone: string;
+  organizer: string;
+};
 
 export default function MeetPage() {
   const { meetingId } = useParams<{ meetingId: string }>();
@@ -16,8 +27,17 @@ export default function MeetPage() {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [leaving, setLeaving] = useState(false);
+  const [info, setInfo] = useState<MeetingInfo | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  useEffect(() => {
+    if (!meetingId) return;
+    fetch(`/api/meetings/public/${meetingId}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data && !data.error) setInfo(data); })
+      .catch(() => {});
+  }, [meetingId]);
 
   async function joinRoom() {
     if (!name.trim()) return;
@@ -94,8 +114,21 @@ export default function MeetPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
               </svg>
             </div>
-            <h1 className="text-xl font-bold text-white">Entrar na reunião</h1>
-            <p className="text-neutral-500 text-sm mt-1 font-mono break-all">{meetingId}</p>
+            <h1 className="text-xl font-bold text-white">{info?.title || "Entrar na reunião"}</h1>
+            {info ? (
+              <>
+                <p className="text-neutral-400 text-sm mt-1.5">
+                  {info.isAllDay
+                    ? new Date(info.startAt).toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" })
+                    : `${new Date(info.startAt).toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })} · ${new Date(info.startAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} – ${new Date(info.endAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`}
+                </p>
+                <p className="text-neutral-600 text-xs mt-1">
+                  Organizado por <span className="text-brand-400 font-semibold">{info.organizer}</span>
+                </p>
+              </>
+            ) : (
+              <p className="text-neutral-500 text-sm mt-1 font-mono break-all">{meetingId}</p>
+            )}
           </div>
 
           <div className="bg-neutral-900 rounded-2xl p-6 border border-neutral-800 space-y-4">
@@ -144,9 +177,18 @@ export default function MeetPage() {
             </button>
           </div>
 
-          <p className="text-center text-xs text-neutral-600 mt-4">
-            Powered by <span className="text-brand-500 font-semibold">Liba+</span>
-          </p>
+          <div className="text-center mt-4 space-y-1">
+            <a
+              href={`/api/meetings/public/${meetingId}/ics`}
+              download
+              className="inline-block text-xs text-brand-400 hover:text-brand-300 underline"
+            >
+              Baixar .ics e adicionar à sua agenda
+            </a>
+            <p className="text-xs text-neutral-600">
+              Powered by <span className="text-brand-500 font-semibold">Liba+</span>
+            </p>
+          </div>
         </div>
       </div>
     );

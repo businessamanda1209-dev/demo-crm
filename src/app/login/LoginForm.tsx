@@ -74,18 +74,19 @@ export default function LoginForm() {
             },
           });
 
-    setLoading(false);
-
     if (result.error) {
+      setLoading(false);
       setError(result.error.message || copy.genericError);
       return;
     }
     if (mode === "signup" && !result.data.session) {
+      setLoading(false);
       setMessage(copy.checkEmail);
       setMode("signin");
       return;
     }
-    router.replace("/");
+    // Success: keep button in loading state — navigation will tear down this component
+    router.replace("/erp");
     router.refresh();
   }
 
@@ -375,7 +376,7 @@ export default function LoginForm() {
               onMouseLeave={e => { if (!loading && config) e.currentTarget.style.background = "#4ade80"; }}
             >
               {loading
-                ? (mode === "signin" ? "Entrando..." : "Criando conta...")
+                ? (mode === "signin" ? "Entrando na sua conta..." : "Criando conta...")
                 : (mode === "signin" ? "Entrar" : "Criar conta")}
             </button>
 

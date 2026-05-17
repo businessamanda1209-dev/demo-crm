@@ -141,6 +141,7 @@ export default function CalendarView({ initialMeetings }: { initialMeetings: Mee
   const [apiError, setApiError] = useState<string | null>(null);
   const [createdResult, setCreatedResult] = useState<CreatedResult | null>(null);
   const [copied, setCopied] = useState(false);
+  const [copiedRowId, setCopiedRowId] = useState<string | null>(null);
   const timegridRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll time grid to 7am on view change
@@ -780,6 +781,19 @@ export default function CalendarView({ initialMeetings }: { initialMeetings: Mee
                     <td className="table-td"><span className={`pill ${STATUS_COLORS[m.status] ?? ""}`}>{STATUS_LABELS[m.status] ?? m.status}</span></td>
                     <td className="table-td text-right">
                       <a href={`/meet/${m.meetingLink}`} target="_blank" rel="noreferrer" className="text-xs font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 mr-3">Entrar</a>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const url = `${window.location.origin}/meet/${m.meetingLink}`;
+                          navigator.clipboard.writeText(url).then(() => {
+                            setCopiedRowId(m.id);
+                            setTimeout(() => setCopiedRowId(null), 2000);
+                          });
+                        }}
+                        className="text-xs font-medium text-slate-500 dark:text-neutral-400 hover:text-slate-700 mr-3"
+                      >
+                        {copiedRowId === m.id ? "Copiado!" : "Copiar convite"}
+                      </button>
                       <a href={`/api/meetings/${m.id}/ics`} download className="text-xs font-medium text-slate-500 dark:text-neutral-400 hover:text-slate-700 mr-3">.ics</a>
                       <button onClick={() => openEdit(m)} className="text-xs font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 mr-3">Editar</button>
                       <button onClick={() => remove(m.id)} className="text-xs font-medium text-rose-500 hover:text-rose-700">Excluir</button>
