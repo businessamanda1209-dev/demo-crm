@@ -55,6 +55,16 @@ export default function Sidebar() {
         </svg>
       ),
     },
+    {
+      href: "/calendar",
+      label: "Agenda",
+      icon: (
+        <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+          <rect x="3" y="4" width="18" height="18" rx="2" />
+          <path d="M16 2v4M8 2v4M3 10h18" />
+        </svg>
+      ),
+    },
   ];
 
   return (
@@ -101,6 +111,21 @@ export default function Sidebar() {
         <ThemeToggle />
         <LanguageToggle />
         <SignOutButton />
+      </div>
+
+      {/* ERP entry point */}
+      <div className="px-3 py-3 border-t border-slate-100 dark:border-neutral-900">
+        <Link
+          href="/erp"
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-brand-600 dark:text-brand-400 bg-brand-50/80 dark:bg-brand-500/10 hover:bg-brand-100/60 dark:hover:bg-brand-500/20 transition-all"
+        >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <rect x="2" y="3" width="20" height="14" rx="2" />
+            <path d="M8 21h8M12 17v4" />
+            <path d="M7 8h.01M7 12h.01M12 8h5M12 12h5" />
+          </svg>
+          Liba Finance
+        </Link>
       </div>
 
       {/* Footer */}

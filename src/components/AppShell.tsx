@@ -2,13 +2,21 @@
 
 import { usePathname } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
+import ErpShell from "@/components/ErpShell";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAuthPage = pathname.startsWith("/login");
 
-  if (isAuthPage) {
+  if (pathname.startsWith("/login")) {
     return <>{children}</>;
+  }
+
+  if (pathname.startsWith("/meet/")) {
+    return <>{children}</>;
+  }
+
+  if (pathname.startsWith("/erp")) {
+    return <ErpShell>{children}</ErpShell>;
   }
 
   return (
